@@ -14,7 +14,16 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.shelterconnect.app"
+      "bundleIdentifier": "com.shelterconnect.app",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.341646914787-ok8ok2lo7155ahoe98uoqcup0srmsfgi"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "package": "com.shelterconnect.app",

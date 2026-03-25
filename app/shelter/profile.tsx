@@ -9,8 +9,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MOCK_SHELTERS, MOCK_PETS } from '@/data/mockPets';
+import { MOCK_SHELTERS } from '@/data/mockPets';
 import { useUserStore } from '@/store/userStore';
+import { useFeedStore } from '@/store/feedStore';
 
 const { width } = Dimensions.get('window');
 const GRID_ITEM = (width - 4) / 3;
@@ -18,6 +19,7 @@ const GRID_ITEM = (width - 4) / 3;
 export default function ShelterProfile() {
   const params = useLocalSearchParams<{ shelterId?: string; fromOnboarding?: string }>();
   const shelterProfile = useUserStore((s) => s.shelterProfile);
+  const feedItems = useFeedStore((s) => s.feedItems);
 
   // If viewing own shelter profile (from onboarding), use store data
   // If viewing another shelter from the feed, use mock data
@@ -40,7 +42,11 @@ export default function ShelterProfile() {
   const displayVax = shelter?.vaccinationPolicy ?? (shelterProfile as any)?.vaccinationPolicy ?? '—';
 
   const shelterId = params.shelterId ?? 's1';
-  const pets = MOCK_PETS.filter((p) => p.shelterId === shelterId);
+  // Own profile: show posts from feedStore (includes user-added animals)
+  // Other shelter: filter from all feed items by shelterId
+  const pets = isOwnProfile
+    ? feedItems.filter((p) => p.shelterId === 'user_shelter')
+    : feedItems.filter((p) => p.shelterId === shelterId);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -117,7 +123,16 @@ export default function ShelterProfile() {
             <Text style={styles.sectionTitle}>Available Animals</Text>
             <View style={styles.grid}>
               {pets.map((pet) => (
-                <View key={pet.id} style={styles.gridItem}>
+                <TouchableOpacity
+                  key={pet.id}
+                  style={styles.gridItem}
+                  activeOpacity={0.85}
+                  onPress={
+                    isOwnProfile
+                      ? () => router.push({ pathname: '/shelter/post', params: { petId: pet.id } })
+                      : undefined
+                  }
+                >
                   <Image
                     source={{ uri: pet.media[0].uri }}
                     style={styles.gridImage}
@@ -126,7 +141,7 @@ export default function ShelterProfile() {
                   <View style={styles.gridOverlay}>
                     <Text style={styles.gridPetName}>{pet.name}</Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -207,12 +222,12 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#F0E6FF',
+    backgroundColor: '#FFF3E8',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 3,
-    borderColor: '#7C3AED',
+    borderColor: '#F97316',
   },
   avatarEmoji: {
     fontSize: 48,
@@ -308,11 +323,11 @@ const styles = StyleSheet.create({
   postAnimalBtn: {
     marginHorizontal: 20,
     marginBottom: 20,
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#F97316',
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
-    shadowColor: '#7C3AED',
+    shadowColor: '#F97316',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 10,

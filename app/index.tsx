@@ -1,24 +1,12 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useUserStore } from '@/store/userStore';
 
-export default function RoleSelection() {
-  const setRole = useUserStore((s) => s.setRole);
-
-  function selectOwner() {
-    setRole('owner');
-    router.push('/owner/questionnaire');
-  }
-
-  function selectShelter() {
-    setRole('shelter');
-    router.push('/shelter/questionnaire');
-  }
-
+export default function Landing() {
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <View style={styles.hero}>
         <Text style={styles.paw}>🐾</Text>
         <Text style={styles.title}>ShelterConnect</Text>
         <Text style={styles.subtitle}>
@@ -26,25 +14,27 @@ export default function RoleSelection() {
         </Text>
       </View>
 
-      <View style={styles.cards}>
-        <TouchableOpacity style={styles.card} onPress={selectOwner} activeOpacity={0.85}>
-          <Text style={styles.cardEmoji}>🏠</Text>
-          <Text style={styles.cardTitle}>I'm looking to adopt</Text>
-          <Text style={styles.cardDesc}>
-            Find your perfect pet match based on your lifestyle
-          </Text>
+      <View style={styles.actions}>
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={() => router.push('/auth/signup')}
+        >
+          <LinearGradient
+            colors={['#F97316', '#EC4899']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.btnPrimary}
+          >
+            <Text style={styles.btnPrimaryText}>Sign Up</Text>
+          </LinearGradient>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.card, styles.cardShelter]}
-          onPress={selectShelter}
-          activeOpacity={0.85}
+          style={styles.btnOutline}
+          activeOpacity={0.88}
+          onPress={() => router.push('/auth/login')}
         >
-          <Text style={styles.cardEmoji}>🏛️</Text>
-          <Text style={styles.cardTitle}>I represent a shelter</Text>
-          <Text style={styles.cardDesc}>
-            Post animals and connect them with loving families
-          </Text>
+          <Text style={styles.btnOutlineText}>Log In</Text>
         </TouchableOpacity>
       </View>
 
@@ -57,70 +47,63 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF8F0',
-    paddingHorizontal: 24,
+    paddingHorizontal: 28,
   },
-  header: {
+  hero: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 20,
   },
   paw: {
-    fontSize: 64,
-    marginBottom: 16,
+    fontSize: 72,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 36,
+    fontSize: 38,
     fontWeight: '800',
     color: '#1A1A2E',
     letterSpacing: -0.5,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   subtitle: {
     fontSize: 18,
     color: '#666',
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: 28,
   },
-  cards: {
-    flex: 1.2,
-    justifyContent: 'center',
-    gap: 16,
+  actions: {
+    paddingBottom: 16,
+    gap: 14,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    padding: 28,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
-    borderWidth: 2,
-    borderColor: '#F0E6FF',
+  btnPrimary: {
+    borderRadius: 16,
+    paddingVertical: 17,
+    alignItems: 'center',
   },
-  cardShelter: {
-    borderColor: '#FFE4B5',
-  },
-  cardEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  cardTitle: {
-    fontSize: 22,
+  btnPrimaryText: {
+    color: '#fff',
+    fontSize: 17,
     fontWeight: '700',
-    color: '#1A1A2E',
-    marginBottom: 8,
+    letterSpacing: 0.2,
   },
-  cardDesc: {
-    fontSize: 15,
-    color: '#888',
-    lineHeight: 22,
+  btnOutline: {
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#F97316',
+  },
+  btnOutlineText: {
+    color: '#F97316',
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   footer: {
     textAlign: 'center',
-    color: '#aaa',
+    color: '#bbb',
     fontSize: 14,
-    paddingBottom: 24,
+    paddingBottom: 20,
+    paddingTop: 8,
   },
 });

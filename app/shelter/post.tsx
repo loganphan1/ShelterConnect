@@ -1,7 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -22,20 +23,32 @@ type PetSize = 'small' | 'medium' | 'large';
 type PetAge = 'young' | 'adult' | 'senior';
 
 export default function ShelterPost() {
+  const { petId } = useLocalSearchParams<{ petId?: string }>();
   const addPost = useFeedStore((s) => s.addPost);
+  const editPost = useFeedStore((s) => s.editPost);
+  const deletePost = useFeedStore((s) => s.deletePost);
+  const feedItems = useFeedStore((s) => s.feedItems);
   const shelterProfile = useUserStore((s) => s.shelterProfile);
 
-  const [mediaUri, setMediaUri] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
-  const [name, setName] = useState('');
-  const [breed, setBreed] = useState('');
-  const [ageDisplay, setAgeDisplay] = useState('');
-  const [bio, setBio] = useState('');
-  const [petType, setPetType] = useState<PetType>('dog');
-  const [petSize, setPetSize] = useState<PetSize>('medium');
-  const [petAge, setPetAge] = useState<PetAge>('adult');
+  const existingPet = petId ? feedItems.find((p) => p.id === petId) : null;
+  const isEditing = !!existingPet;
+
+  const [mediaUri, setMediaUri] = useState<string | null>(existingPet?.media[0]?.uri ?? null);
+  const [mediaType, setMediaType] = useState<'image' | 'video'>(existingPet?.media[0]?.type ?? 'image');
+  const [name, setName] = useState(existingPet?.name ?? '');
+  const [breed, setBreed] = useState(existingPet?.breed ?? '');
+  const [ageDisplay, setAgeDisplay] = useState(existingPet?.ageDisplay ?? '');
+  const [bio, setBio] = useState(existingPet?.bio ?? '');
+  const [petType, setPetType] = useState<PetType>(existingPet?.type ?? 'dog');
+  const [petSize, setPetSize] = useState<PetSize>(existingPet?.size ?? 'medium');
+  const [petAge, setPetAge] = useState<PetAge>(existingPet?.age ?? 'adult');
 
   async function pickMedia(type: 'photo' | 'video') {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow access to your photo library in Settings.');
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: type === 'photo' ? ['images'] : ['videos'],
       allowsEditing: true,
@@ -50,6 +63,11 @@ export default function ShelterPost() {
   }
 
   async function takePhoto() {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please allow camera access in Settings.');
+      return;
+    }
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       quality: 0.85,
@@ -63,11 +81,11 @@ export default function ShelterPost() {
   }
 
   function submit() {
-    if (!name || !mediaUri) return;
+    if (!mediaUri) return;
 
-    const newPet: Pet = {
-      id: `user_${Date.now()}`,
-      name,
+    const pet: Pet = {
+      id: existingPet?.id ?? `user_${Date.now()}`,
+      name: name.trim() || 'Unnamed Pet',
       breed: breed || 'Mixed breed',
       type: petType,
       size: petSize,
@@ -80,14 +98,36 @@ export default function ShelterPost() {
       needsYard: false,
       media: [{ type: mediaType, uri: mediaUri }],
       bio: bio || `Meet ${name}! Looking for a loving forever home.`,
-      shelterId: 'user_shelter',
+      shelterId: existingPet?.shelterId ?? 'user_shelter',
     };
 
-    addPost(newPet);
+    if (isEditing) {
+      editPost(pet);
+    } else {
+      addPost(pet);
+    }
     router.replace({ pathname: '/shelter/profile', params: { fromOnboarding: '1' } });
   }
 
-  const canSubmit = name.trim().length > 0 && mediaUri !== null;
+  function confirmDelete() {
+    Alert.alert(
+      'Remove listing',
+      `Are you sure you want to remove ${existingPet?.name ?? 'this animal'}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            deletePost(petId!);
+            router.replace({ pathname: '/shelter/profile', params: { fromOnboarding: '1' } });
+          },
+        },
+      ]
+    );
+  }
+
+  const canSubmit = mediaUri !== null;
 
   return (
     <KeyboardAvoidingView
@@ -100,12 +140,12 @@ export default function ShelterPost() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backIcon}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Post an Animal</Text>
+          <Text style={styles.headerTitle}>{isEditing ? 'Edit Listing' : 'Post an Animal'}</Text>
           <TouchableOpacity
             style={[styles.submitBtn, !canSubmit && styles.submitBtnDisabled]}
             onPress={canSubmit ? submit : undefined}
           >
-            <Text style={styles.submitBtnText}>Post</Text>
+            <Text style={styles.submitBtnText}>{isEditing ? 'Save' : 'Post'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -149,6 +189,9 @@ export default function ShelterPost() {
                 placeholderTextColor="#bbb"
                 value={name}
                 onChangeText={setName}
+                textContentType="none"
+                autoComplete="off"
+                autoCorrect={false}
               />
             </Field>
 
@@ -159,6 +202,9 @@ export default function ShelterPost() {
                 placeholderTextColor="#bbb"
                 value={breed}
                 onChangeText={setBreed}
+                textContentType="none"
+                autoComplete="off"
+                autoCorrect={false}
               />
             </Field>
 
@@ -169,6 +215,9 @@ export default function ShelterPost() {
                 placeholderTextColor="#bbb"
                 value={ageDisplay}
                 onChangeText={setAgeDisplay}
+                textContentType="none"
+                autoComplete="off"
+                autoCorrect={false}
               />
             </Field>
 
@@ -230,9 +279,18 @@ export default function ShelterPost() {
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
+                textContentType="none"
+                autoComplete="off"
+                autoCorrect={false}
               />
             </Field>
           </View>
+
+          {isEditing && (
+            <TouchableOpacity style={styles.deleteBtn} onPress={confirmDelete}>
+              <Text style={styles.deleteBtnText}>🗑 Remove listing</Text>
+            </TouchableOpacity>
+          )}
 
           <View style={{ height: 40 }} />
         </ScrollView>
@@ -288,7 +346,7 @@ const styles = StyleSheet.create({
     color: '#1A1A2E',
   },
   submitBtn: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#F97316',
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
@@ -385,7 +443,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#fff',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -413,12 +471,26 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
   toggleSelected: {
-    borderColor: '#7C3AED',
+    borderColor: '#F97316',
     backgroundColor: '#F5F0FF',
   },
   toggleText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#444',
+  },
+  deleteBtn: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#EF4444',
+    alignItems: 'center',
+  },
+  deleteBtnText: {
+    color: '#EF4444',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

@@ -60,9 +60,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   selected: {
-    borderColor: '#7C3AED',
-    backgroundColor: '#F5F0FF',
-    shadowColor: '#7C3AED',
+    borderColor: '#F97316',
+    backgroundColor: '#FFF3E8',
+    shadowColor: '#F97316',
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 4,
@@ -78,6 +78,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   labelSelected: {
-    color: '#7C3AED',
+    color: '#F97316',
   },
 });

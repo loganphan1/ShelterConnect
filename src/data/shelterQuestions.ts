@@ -5,6 +5,7 @@ export type ShelterQuestion =
       subtitle: string;
       type: 'text' | 'phone';
       placeholder: string;
+      defaultValue: string;
     }
   | {
       id: string;
@@ -21,21 +22,16 @@ export const SHELTER_QUESTIONS: ShelterQuestion[] = [
     title: 'What\'s the name\nof your shelter?',
     subtitle: 'This will appear on your public profile',
     type: 'text',
-    placeholder: 'e.g. Happy Paws Animal Rescue',
-  },
-  {
-    id: 'phone',
-    title: 'What\'s your contact\nphone number?',
-    subtitle: 'So adopters can reach you directly',
-    type: 'phone',
-    placeholder: 'e.g. (415) 555-0192',
+    placeholder: 'e.g. Happy Paws Animal Rescue (optional)',
+    defaultValue: 'My Shelter',
   },
   {
     id: 'address',
     title: 'Where is your\nshelter located?',
     subtitle: 'Enter your full address',
     type: 'text',
-    placeholder: 'e.g. 123 Main St, San Francisco, CA',
+    placeholder: 'e.g. 123 Main St, San Francisco, CA (optional)',
+    defaultValue: 'Address not provided',
   },
   {
     id: 'animalTypes',

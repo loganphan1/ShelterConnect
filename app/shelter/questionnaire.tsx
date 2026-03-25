@@ -40,7 +40,10 @@ export default function ShelterQuestionnaire() {
   }
 
   function goNext() {
-    setShelterProfile({ [question.id]: answers[question.id] } as any);
+    const value =
+      (answers[question.id] || '').trim() ||
+      (question.type === 'text' || question.type === 'phone' ? question.defaultValue : '');
+    setShelterProfile({ [question.id]: value } as any);
 
     if (isLast) {
       router.replace({ pathname: '/shelter/profile', params: { fromOnboarding: '1' } });
@@ -60,10 +63,7 @@ export default function ShelterQuestionnaire() {
     setCurrentIndex((i) => i - 1);
   }
 
-  const canProceed =
-    question.type === 'text' || question.type === 'phone'
-      ? (answers[question.id] || '').trim().length > 0
-      : true;
+  const canProceed = true;
 
   return (
     <KeyboardAvoidingView
@@ -98,15 +98,21 @@ export default function ShelterQuestionnaire() {
 
           {(question.type === 'text' || question.type === 'phone') && (
             <TextInput
+              key={question.id}
               style={styles.textInput}
               placeholder={question.placeholder}
               placeholderTextColor="#bbb"
-              value={answers[question.id] ?? ''}
+              defaultValue={answers[question.id] ?? ''}
               onChangeText={(t) => setAnswers((prev) => ({ ...prev, [question.id]: t }))}
-              keyboardType={question.type === 'phone' ? 'phone-pad' : 'default'}
+              keyboardType="default"
               autoFocus
+              autoComplete="off"
+              autoCorrect={false}
+              spellCheck={false}
+              textContentType="none"
+              importantForAutofill="no"
               returnKeyType="next"
-              onSubmitEditing={canProceed ? goNext : undefined}
+              onSubmitEditing={goNext}
             />
           )}
 
@@ -137,8 +143,8 @@ export default function ShelterQuestionnaire() {
 
         <View style={styles.footer}>
           <TouchableOpacity
-            style={[styles.nextButton, !canProceed && styles.nextButtonDisabled]}
-            onPress={canProceed ? goNext : undefined}
+            style={styles.nextButton}
+            onPress={goNext}
             activeOpacity={0.85}
           >
             <Text style={styles.nextButtonText}>

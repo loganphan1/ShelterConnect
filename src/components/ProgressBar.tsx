@@ -41,7 +41,7 @@ export default function ProgressBar({ progress, currentStep, totalSteps }: Props
       <View style={styles.track}>
         <Animated.View style={[styles.fillWrapper, animatedStyle]}>
           <LinearGradient
-            colors={['#7C3AED', '#EC4899', '#F97316']}
+            colors={['#FB923C', '#EC4899', '#F97316']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={StyleSheet.absoluteFill}

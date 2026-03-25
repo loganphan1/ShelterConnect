@@ -19,6 +19,7 @@ export type Pet = {
   media: PetMedia[];
   bio: string;
   shelterId: string;
+  distanceMiles: number;
   score?: number;
 };
 
@@ -94,6 +95,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Buddy is a playful golden retriever who loves fetch, long runs, and cuddles. He\'s great with kids and other dogs!',
     shelterId: 's1',
+    distanceMiles: 2.3,
   },
   {
     id: 'p2',
@@ -113,6 +115,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Luna is a calm, affectionate cat who loves sunny windowsills and gentle petting. Prefers to be the only pet.',
     shelterId: 's1',
+    distanceMiles: 2.3,
   },
   {
     id: 'p3',
@@ -132,6 +135,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Max is a charming Frenchie who loves apartment life. He\'s great with kids and other dogs, and his energy level is just right.',
     shelterId: 's2',
+    distanceMiles: 9.4,
   },
   {
     id: 'p4',
@@ -151,6 +155,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Bella is a loyal and gentle lab mix who loves hiking and swimming. She\'s a total family dog.',
     shelterId: 's2',
+    distanceMiles: 9.4,
   },
   {
     id: 'p5',
@@ -170,6 +175,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Oliver is a majestic Maine Coon who gets along with everyone. He loves to chat and follow you around the house.',
     shelterId: 's3',
+    distanceMiles: 4.6,
   },
   {
     id: 'p6',
@@ -189,6 +195,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Daisy is a hypoallergenic doodle mix full of love and energy. Perfect for families and people with allergies!',
     shelterId: 's1',
+    distanceMiles: 2.3,
   },
   {
     id: 'p7',
@@ -208,6 +215,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Charlie is an adventurous beagle who loves sniffing everything on long walks. A wonderful family companion.',
     shelterId: 's2',
+    distanceMiles: 9.4,
   },
   {
     id: 'p8',
@@ -227,6 +235,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Mochi is a fluffy kitten who loves to play and explore. She gets along with other cats and would love a playmate.',
     shelterId: 's3',
+    distanceMiles: 4.6,
   },
   {
     id: 'p9',
@@ -246,6 +255,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Rocky is a calm and loyal shepherd mix who would thrive as the only pet in a home with a yard.',
     shelterId: 's1',
+    distanceMiles: 2.3,
   },
   {
     id: 'p10',
@@ -265,6 +275,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Cleo is a graceful senior cat who loves being the center of attention. She\'s wise, gentle, and full of love.',
     shelterId: 's2',
+    distanceMiles: 9.4,
   },
   {
     id: 'p11',
@@ -284,6 +295,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Archie the Corgi is endlessly entertaining. He herds everyone, including the cat next door. Pure joy in a little package.',
     shelterId: 's3',
+    distanceMiles: 4.6,
   },
   {
     id: 'p12',
@@ -303,6 +315,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Willow is a brilliant border collie who thrives with active owners. She needs space, stimulation, and tons of love.',
     shelterId: 's2',
+    distanceMiles: 9.4,
   },
   {
     id: 'p13',
@@ -322,6 +335,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Nala is a social tabby who loves attention and playing. She gets along well with other cats and calm dogs.',
     shelterId: 's1',
+    distanceMiles: 2.3,
   },
   {
     id: 'p14',
@@ -341,6 +355,7 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Bear is a gentle giant who loves everyone. He\'s great with kids, dogs, and cats. The perfect family dog.',
     shelterId: 's3',
+    distanceMiles: 4.6,
   },
   {
     id: 'p15',
@@ -360,5 +375,6 @@ export const MOCK_PETS: Pet[] = [
     ],
     bio: 'Hazel is a dignified senior dachshund who deserves a quiet forever home. She loves soft blankets and gentle scratches.',
     shelterId: 's1',
+    distanceMiles: 2.3,
   },
 ];

@@ -1,5 +1,4 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -10,9 +9,10 @@ import {
 } from 'react-native';
 import { MOCK_SHELTERS } from '@/data/mockPets';
 import type { Pet } from '@/data/mockPets';
+import { useUserStore } from '@/store/userStore';
 
 const { width, height } = Dimensions.get('window');
-const CARD_HEIGHT = height * 0.78;
+const CARD_HEIGHT = height;
 
 type Props = {
   pet: Pet;
@@ -20,7 +20,9 @@ type Props = {
 };
 
 export default function PetCard({ pet, isVisible }: Props) {
-  const [liked, setLiked] = useState(false);
+  const savedPetIds = useUserStore((s) => s.savedPetIds);
+  const toggleSave = useUserStore((s) => s.toggleSave);
+  const liked = savedPetIds.includes(pet.id);
   const shelter = MOCK_SHELTERS.find((s) => s.id === pet.shelterId);
   const firstMedia = pet.media[0];
 
@@ -41,27 +43,23 @@ export default function PetCard({ pet, isVisible }: Props) {
         {/* Gradient overlay */}
         <View style={styles.gradient} />
 
-        {/* Match badge */}
-        {pet.score !== undefined && (
-          <View style={styles.matchBadge}>
-            <Text style={styles.matchText}>{pet.score}% match</Text>
-          </View>
-        )}
-
-        {/* Heart button */}
-        <TouchableOpacity
-          style={styles.heartButton}
-          onPress={() => setLiked((l) => !l)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.heartEmoji}>{liked ? '❤️' : '🤍'}</Text>
-        </TouchableOpacity>
-
         {/* Info overlay */}
         <View style={styles.infoOverlay}>
           <View style={styles.nameRow}>
-            <Text style={styles.petName}>{pet.name}</Text>
-            <Text style={styles.petAge}>{pet.ageDisplay}</Text>
+            <View style={styles.nameRowLeft}>
+              <TouchableOpacity onPress={() => toggleSave(pet.id)} activeOpacity={0.8}>
+                <Text style={styles.heartEmoji}>{liked ? '❤️' : '🤍'}</Text>
+              </TouchableOpacity>
+              {pet.score !== undefined && (
+                <View style={styles.matchBadge}>
+                  <Text style={styles.matchText}>{pet.score}% match</Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.nameRowRight}>
+              <Text style={styles.petName}>{pet.name}</Text>
+              <Text style={styles.petAge}>{pet.ageDisplay}</Text>
+            </View>
           </View>
           <Text style={styles.petBreed}>{pet.breed}</Text>
 
@@ -92,6 +90,7 @@ export default function PetCard({ pet, isVisible }: Props) {
           <View style={styles.actions}>
             <TouchableOpacity onPress={openShelterProfile} style={styles.shelterButton}>
               <Text style={styles.shelterName}>🏠 {shelter?.name}</Text>
+              <Text style={styles.distanceText}>📍 {pet.distanceMiles} mi away</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.adoptButton} activeOpacity={0.85}>
@@ -125,12 +124,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 0,
   },
   matchBadge: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    backgroundColor: '#7C3AED',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: '#F97316',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 20,
   },
   matchText: {
@@ -138,17 +134,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
-  heartButton: {
-    position: 'absolute',
-    top: 12,
-    right: 16,
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   heartEmoji: {
-    fontSize: 32,
+    fontSize: 28,
   },
   infoOverlay: {
     position: 'absolute',
@@ -161,9 +148,19 @@ const styles = StyleSheet.create({
   },
   nameRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 4,
+  },
+  nameRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  nameRowRight: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
   },
   petName: {
     fontSize: 32,
@@ -219,12 +216,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+  distanceText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    marginTop: 2,
+  },
   adoptButton: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#F97316',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
-    shadowColor: '#7C3AED',
+    shadowColor: '#F97316',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

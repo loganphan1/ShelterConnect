@@ -194,11 +194,11 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   nextButton: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#F97316',
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
-    shadowColor: '#7C3AED',
+    shadowColor: '#F97316',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
