@@ -1,9 +1,6 @@
-import * as Google from 'expo-auth-session/providers/google';
-import * as Crypto from 'expo-crypto';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -20,8 +17,6 @@ import { Toast } from '@/components/Toast';
 import { supabase } from '@/lib/supabase';
 import { useUserStore } from '@/store/userStore';
 
-WebBrowser.maybeCompleteAuthSession();
-
 export default function SignUp() {
   const signIn = useUserStore((s) => s.signIn);
   const [email, setEmail] = useState('');
@@ -29,55 +24,10 @@ export default function SignUp() {
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(false);
+
   function navigateAfterAuth() {
     setToast(true);
     setTimeout(() => router.replace('/role-select'), 1400);
-  }
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,
-  });
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const token = response.authentication?.accessToken;
-      if (token) handleGoogleAuth(token);
-    } else if (response?.type === 'error') {
-      Alert.alert('Google sign-in failed', response.error?.message ?? 'Unknown error');
-    }
-  }, [response]);
-
-  async function handleGoogleAuth(accessToken: string) {
-    try {
-      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const googleUser = await res.json();
-      // Use a deterministic password derived from the stable Google sub ID
-      const password = await Crypto.digestStringAsync(
-        Crypto.CryptoDigestAlgorithm.SHA256,
-        `google:${googleUser.id}`
-      );
-      let { data, error } = await supabase.auth.signInWithPassword({ email: googleUser.email, password });
-      if (error?.message?.toLowerCase().includes('invalid login credentials')) {
-        // First time — create the account
-        ({ data, error } = await supabase.auth.signUp({
-          email: googleUser.email,
-          password,
-          options: { data: { full_name: googleUser.name, avatar_url: googleUser.picture } },
-        }));
-      }
-      if (error || !data.user) {
-        Alert.alert('Sign-in failed', error?.message ?? 'Could not authenticate with Google.');
-        return;
-      }
-      await signIn(data.user.id, googleUser.email, googleUser.name, googleUser.picture);
-      navigateAfterAuth();
-    } catch {
-      Alert.alert('Error', 'Could not complete Google sign-in.');
-    }
   }
 
   async function handleSignUp() {
@@ -85,24 +35,34 @@ export default function SignUp() {
       Alert.alert('Missing fields', 'Please fill in all fields.');
       return;
     }
+
     if (password !== confirm) {
       Alert.alert('Password mismatch', 'Passwords do not match.');
       return;
     }
+
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+    });
+
     setLoading(false);
+
     if (error || !data.user) {
       Alert.alert('Sign-up failed', error?.message ?? 'Could not create account.');
       return;
     }
-    await signIn(data.user.id, data.user.email ?? email);
+
+    await signIn(data.user.id, data.user.email ?? email.trim());
     navigateAfterAuth();
   }
 
   return (
     <SafeAreaView style={styles.safe}>
       <Toast message="Account created successfully!" visible={toast} />
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -166,22 +126,6 @@ export default function SignUp() {
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
-
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.btnGoogle, !request && { opacity: 0.5 }]}
-              activeOpacity={0.88}
-              disabled={!request}
-              onPress={() => promptAsync()}
-            >
-              <Text style={styles.googleIcon}>G</Text>
-              <Text style={styles.btnGoogleText}>Continue with Google</Text>
-            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
@@ -236,26 +180,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   btnPrimaryText: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-  },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
-  dividerText: { marginHorizontal: 12, color: '#bbb', fontSize: 14 },
-  btnGoogle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    paddingVertical: 15,
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    gap: 10,
-  },
-  googleIcon: { fontSize: 18, fontWeight: '800', color: '#4285F4' },
-  btnGoogleText: { fontSize: 16, fontWeight: '600', color: '#1A1A2E' },
   switchRow: { alignItems: 'center', marginTop: 28 },
   switchText: { fontSize: 15, color: '#888' },
   switchLink: { color: '#F97316', fontWeight: '700' },

@@ -45,21 +45,20 @@ export default function OwnerQuestionnaire() {
     setAnswers((prev) => ({ ...prev, [question.id]: value }));
   }
 
-  function goNext() {
-    setOwnerAnswer(question.id, answers[question.id]);
+async function goNext() {
+  await setOwnerAnswer(question.id, answers[question.id]);
 
-    if (isLast) {
-      // Run matching and go to feed
-      const allAnswers = { ...ownerAnswers, [question.id]: answers[question.id] };
-      const matched = matchPets(MOCK_PETS, allAnswers);
-      setFeedItems(matched);
-      router.replace('/owner/feed');
-      return;
-    }
-
-    setAnimKey((k) => k + 1);
-    setCurrentIndex((i) => i + 1);
+  if (isLast) {
+    const allAnswers = { ...ownerAnswers, [question.id]: answers[question.id] };
+    const matched = matchPets(MOCK_PETS, allAnswers);
+    setFeedItems(matched);
+    router.replace('/owner/feed');
+    return;
   }
+
+  setAnimKey((k) => k + 1);
+  setCurrentIndex((i) => i + 1);
+}
 
   function goBack() {
     if (currentIndex === 0) {
