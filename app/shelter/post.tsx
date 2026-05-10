@@ -23,7 +23,11 @@ type PetSize = 'small' | 'medium' | 'large';
 type PetAge = 'young' | 'adult' | 'senior';
 
 export default function ShelterPost() {
-  const { petId } = useLocalSearchParams<{ petId?: string }>();
+  const params = useLocalSearchParams<{ petId?: string | string[] }>();
+
+  const petId = Array.isArray(params.petId)
+    ? params.petId[0]
+    : params.petId;
   const addPost = useFeedStore((s) => s.addPost);
   const editPost = useFeedStore((s) => s.editPost);
   const deletePost = useFeedStore((s) => s.deletePost);
@@ -122,24 +126,47 @@ export default function ShelterPost() {
 }
 
   function confirmDelete() {
-  if (!petId) return;
+  if (!petId) {
+    Alert.alert('Error', 'Could not find this animal listing.');
+    return;
+  }
+
+  const removePet = () => {
+    console.log('Deleting pet with id:', petId);
+
+    deletePost(petId);
+
+    router.replace({
+      pathname: '/shelter/profile',
+      params: { fromOnboarding: '1' },
+    });
+  };
+
+  if (Platform.OS === 'web') {
+    const confirmed = window.confirm(
+      `Are you sure you want to remove ${
+        existingPet?.name ?? 'this animal'
+      }? This animal will no longer appear as available.`
+    );
+
+    if (confirmed) {
+      removePet();
+    }
+
+    return;
+  }
 
   Alert.alert(
     'Remove listing',
-    `Are you sure you want to remove ${existingPet?.name ?? 'this animal'}? This animal will no longer appear as available.`,
+    `Are you sure you want to remove ${
+      existingPet?.name ?? 'this animal'
+    }? This animal will no longer appear as available.`,
     [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove',
         style: 'destructive',
-        onPress: () => {
-          deletePost(petId);
-
-          router.replace({
-            pathname: '/shelter/profile',
-            params: { fromOnboarding: '1' },
-          });
-        },
+        onPress: removePet,
       },
     ]
   );

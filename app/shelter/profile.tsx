@@ -108,45 +108,63 @@ export default function ShelterProfile() {
 
         {/* Post button for own profile */}
         {isOwnProfile && (
-          <TouchableOpacity
-            style={styles.postAnimalBtn}
-            onPress={() => router.push('/shelter/post')}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.postAnimalText}>📸 Post a New Animal</Text>
-          </TouchableOpacity>
-        )}
+  <TouchableOpacity
+    onPress={() => router.push('/shelter/post')}
+    activeOpacity={0.85}
+    style={styles.postAnimalBtn}
+  >
+    <Text style={styles.postAnimalText}>+ Add Animal Listing</Text>
+  </TouchableOpacity>
+)}
 
         {/* Animal grid */}
-        {pets.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Available Animals</Text>
-            <View style={styles.grid}>
-              {pets.map((pet) => (
-                <TouchableOpacity
-                  key={pet.id}
-                  style={styles.gridItem}
-                  activeOpacity={0.85}
-                  onPress={
-                    isOwnProfile
-                      ? () => router.push({ pathname: '/shelter/post', params: { petId: pet.id } })
-                      : undefined
-                  }
-                >
-                  <Image
-                    source={{ uri: pet.media[0].uri }}
-                    style={styles.gridImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.gridOverlay}>
-                    <Text style={styles.gridPetName}>{pet.name}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
+<View style={styles.section}>
+  <Text style={styles.sectionTitle}>
+    {isOwnProfile ? 'Manage Available Animals' : 'Available Animals'}
+  </Text>
 
+  {isOwnProfile && (
+    <Text style={styles.manageHint}>
+      Tap an animal to edit or remove its listing.
+    </Text>
+  )}
+
+  {pets.length > 0 ? (
+    <View style={styles.grid}>
+      {pets.map((pet) => (
+        <TouchableOpacity
+          key={pet.id}
+          style={styles.gridItem}
+          activeOpacity={0.85}
+          onPress={
+            isOwnProfile
+              ? () =>
+                  router.push({
+                    pathname: '/shelter/post',
+                    params: { petId: pet.id },
+                  })
+              : undefined
+          }
+        >
+          <Image source={{ uri: pet.media[0]?.uri }} style={styles.gridImage} />
+
+          <View style={styles.gridOverlay}>
+            <Text style={styles.gridPetName}>{pet.name}</Text>
+            {isOwnProfile && (
+              <Text style={styles.gridManageText}>Tap to manage</Text>
+            )}
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+  ) : (
+    <Text style={styles.emptyText}>
+      {isOwnProfile
+        ? 'No animal listings yet. Add your first available animal.'
+        : 'No available animals listed right now.'}
+    </Text>
+  )}
+</View>
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
@@ -370,4 +388,23 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
   },
+  manageHint: {
+  fontSize: 14,
+  color: '#777',
+  marginBottom: 14,
+  lineHeight: 20,
+},
+
+gridManageText: {
+  color: '#fff',
+  fontSize: 9,
+  fontWeight: '500',
+  marginTop: 2,
+},
+
+emptyText: {
+  fontSize: 14,
+  color: '#777',
+  lineHeight: 20,
+},
 });
