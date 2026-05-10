@@ -29,7 +29,7 @@
       "package": "com.shelterconnect.app",
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
-        "foregroundImage": "./assets/adaptive-icon.png"
+        "foregroundImage": "./assets/icon.png"
       }
     },
     "web": {
@@ -38,7 +38,6 @@
     },
     "plugins": [
       "expo-router",
-      "expo-av",
       [
         "expo-image-picker",
         {
