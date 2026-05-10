@@ -81,33 +81,45 @@ export default function ShelterPost() {
   }
 
   function submit() {
-    if (!mediaUri) return;
-
-    const pet: Pet = {
-      id: existingPet?.id ?? `user_${Date.now()}`,
-      name: name.trim() || 'Unnamed Pet',
-      breed: breed || 'Mixed breed',
-      type: petType,
-      size: petSize,
-      age: petAge,
-      ageDisplay: ageDisplay || 'Unknown age',
-      energyLevel: 'medium',
-      goodWithKids: true,
-      goodWithPets: true,
-      hypoallergenic: false,
-      needsYard: false,
-      media: [{ type: mediaType, uri: mediaUri }],
-      bio: bio || `Meet ${name}! Looking for a loving forever home.`,
-      shelterId: existingPet?.shelterId ?? 'user_shelter',
-    };
-
-    if (isEditing) {
-      editPost(pet);
-    } else {
-      addPost(pet);
-    }
-    router.replace({ pathname: '/shelter/profile', params: { fromOnboarding: '1' } });
+  if (!mediaUri) {
+    Alert.alert('Photo required', 'Please add at least one photo or video for this animal.');
+    return;
   }
+
+  const trimmedName = name.trim();
+
+  const pet: Pet = {
+    id: existingPet?.id ?? `user_${Date.now()}`,
+    name: trimmedName || 'Unnamed Pet',
+    breed: breed.trim() || 'Mixed breed',
+    type: petType,
+    size: petSize,
+    age: petAge,
+    ageDisplay: ageDisplay.trim() || 'Unknown age',
+    energyLevel: existingPet?.energyLevel ?? 'medium',
+    goodWithKids: existingPet?.goodWithKids ?? true,
+    goodWithPets: existingPet?.goodWithPets ?? true,
+    hypoallergenic: existingPet?.hypoallergenic ?? false,
+    needsYard: existingPet?.needsYard ?? false,
+    media: [{ type: mediaType, uri: mediaUri }],
+    bio:
+      bio.trim() ||
+      `Meet ${trimmedName || 'this pet'}! Looking for a loving forever home.`,
+    shelterId: existingPet?.shelterId ?? 'user_shelter',
+    distanceMiles: existingPet?.distanceMiles ?? 0,
+  };
+
+  if (isEditing) {
+    editPost(pet);
+  } else {
+    addPost(pet);
+  }
+
+  router.replace({
+    pathname: '/shelter/profile',
+    params: { fromOnboarding: '1' },
+  });
+}
 
   function confirmDelete() {
     Alert.alert(
