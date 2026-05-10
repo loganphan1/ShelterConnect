@@ -54,14 +54,20 @@ export default function ShelterQuestionnaire() {
     setCurrentIndex((i) => i + 1);
   }
 
-  function goBack() {
-    if (currentIndex === 0) {
+function goBack() {
+  if (currentIndex === 0) {
+    if (router.canGoBack()) {
       router.back();
-      return;
+    } else {
+      router.replace('/');
     }
-    setAnimKey((k) => k + 1);
-    setCurrentIndex((i) => i - 1);
+    return;
   }
+
+  setAnimKey((k) => k + 1);
+  setCurrentIndex((i) => i - 1);
+}
+
 
   const canProceed = true;
 
