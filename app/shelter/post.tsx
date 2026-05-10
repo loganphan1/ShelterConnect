@@ -122,22 +122,28 @@ export default function ShelterPost() {
 }
 
   function confirmDelete() {
-    Alert.alert(
-      'Remove listing',
-      `Are you sure you want to remove ${existingPet?.name ?? 'this animal'}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            deletePost(petId!);
-            router.replace({ pathname: '/shelter/profile', params: { fromOnboarding: '1' } });
-          },
+  if (!petId) return;
+
+  Alert.alert(
+    'Remove listing',
+    `Are you sure you want to remove ${existingPet?.name ?? 'this animal'}? This animal will no longer appear as available.`,
+    [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () => {
+          deletePost(petId);
+
+          router.replace({
+            pathname: '/shelter/profile',
+            params: { fromOnboarding: '1' },
+          });
         },
-      ]
-    );
-  }
+      },
+    ]
+  );
+}
 
   const canSubmit = mediaUri !== null;
 
