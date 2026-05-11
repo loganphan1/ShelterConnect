@@ -26,10 +26,10 @@ export default function SavedPets() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backIcon}>←</Text>
+        <TouchableOpacity onPress={() => router.replace('/owner/feed')} style={styles.backBtn}>
+        <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Saved Animals</Text>
+         <Text style={styles.headerTitle}>Saved Animals</Text>
         <View style={{ width: 40 }} />
       </View>
 

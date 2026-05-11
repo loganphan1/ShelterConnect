@@ -24,6 +24,7 @@ type TypeFilter = 'all' | 'dog' | 'cat';
 export default function OwnerFeed() {
   const feedItems = useFeedStore((s) => s.feedItems);
   const savedPetIds = useUserStore((s) => s.savedPetIds);
+  const signOut = useUserStore((s) => s.signOut);
   const insets = useSafeAreaInsets();
 
   const [sortMode, setSortMode] = useState<SortMode>('score');
@@ -61,17 +62,26 @@ export default function OwnerFeed() {
     return <PetCard pet={item} isVisible={visibleId === item.id} />;
   }
 
+  function handleLogout() {
+    signOut();
+    router.replace('/');
+  }
+
   const HEADER_HEIGHT = insets.top + 56;
   const hasActiveFilters = typeFilter !== 'all' || sortMode !== 'score';
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <SafeAreaView edges={['top']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.replace('/owner/questionnaire?start=last')}
+          style={styles.backBtn}
+        >
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
+
         <Text style={styles.headerTitle}>🐾 Your Matches</Text>
+
         <View style={styles.headerRight}>
           <TouchableOpacity
             style={[styles.filterToggleBtn, hasActiveFilters && styles.filterToggleBtnActive]}
@@ -82,6 +92,7 @@ export default function OwnerFeed() {
               {filtersOpen ? '✕' : '⊞'}
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity onPress={() => router.push('/owner/saved')} style={styles.savedBtn}>
             <Text style={styles.savedBtnText}>❤️</Text>
             {savedPetIds.length > 0 && (
@@ -90,10 +101,13 @@ export default function OwnerFeed() {
               </View>
             )}
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
 
-      {/* Collapsible sort / filter bar */}
       {filtersOpen && (
         <View style={[styles.filterBar, { top: HEADER_HEIGHT }]}>
           <View style={styles.pillGroup}>
@@ -110,6 +124,7 @@ export default function OwnerFeed() {
               </TouchableOpacity>
             ))}
           </View>
+
           <View style={styles.pillGroup}>
             <TouchableOpacity
               style={[styles.pill, sortMode === 'score' && styles.pillActive]}
@@ -120,6 +135,7 @@ export default function OwnerFeed() {
                 Best Match
               </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={[styles.pill, sortMode === 'distance' && styles.pillActive]}
               onPress={() => setSortMode('distance')}
@@ -147,7 +163,6 @@ export default function OwnerFeed() {
         snapToAlignment="start"
       />
 
-      {/* Bottom hint */}
       <SafeAreaView edges={['bottom']} style={styles.bottomHint}>
         <Text style={styles.hintText}>Swipe up to see more matches</Text>
       </SafeAreaView>
@@ -239,6 +254,19 @@ const styles = StyleSheet.create({
   savedBadgeText: {
     color: '#fff',
     fontSize: 10,
+    fontWeight: '700',
+  },
+  logoutBtn: {
+    height: 40,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 20,
+  },
+  logoutText: {
+    color: '#fff',
+    fontSize: 12,
     fontWeight: '700',
   },
   filterBar: {

@@ -19,14 +19,12 @@ const GRID_ITEM = (width - 4) / 3;
 export default function ShelterProfile() {
   const params = useLocalSearchParams<{ shelterId?: string; fromOnboarding?: string }>();
   const shelterProfile = useUserStore((s) => s.shelterProfile);
+  const signOut = useUserStore((s) => s.signOut);
   const feedItems = useFeedStore((s) => s.feedItems);
 
-  // If viewing own shelter profile (from onboarding), use store data
-  // If viewing another shelter from the feed, use mock data
-  const shelter =
-    params.shelterId
-      ? MOCK_SHELTERS.find((s) => s.id === params.shelterId)
-      : null;
+  const shelter = params.shelterId
+    ? MOCK_SHELTERS.find((s) => s.id === params.shelterId)
+    : null;
 
   const isOwnProfile = !params.shelterId || params.fromOnboarding === '1';
 
@@ -42,33 +40,45 @@ export default function ShelterProfile() {
   const displayVax = shelter?.vaccinationPolicy ?? (shelterProfile as any)?.vaccinationPolicy ?? '—';
 
   const shelterId = params.shelterId ?? 's1';
-  // Own profile: show posts from feedStore (includes user-added animals)
-  // Other shelter: filter from all feed items by shelterId
+
   const pets = isOwnProfile
     ? feedItems.filter((p) => p.shelterId === 'user_shelter')
     : feedItems.filter((p) => p.shelterId === shelterId);
 
+  function handleLogout() {
+    signOut();
+    router.replace('/');
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header nav */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.replace('/shelter/questionnaire?start=last')}
+          style={styles.backBtn}
+        >
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Shelter Profile</Text>
-        {isOwnProfile && (
-          <TouchableOpacity
-            onPress={() => router.push('/shelter/post')}
-            style={styles.postBtn}
-          >
-            <Text style={styles.postBtnText}>+ Post</Text>
+
+        <View style={styles.headerActions}>
+          {isOwnProfile && (
+            <TouchableOpacity
+              onPress={() => router.push('/shelter/post')}
+              style={styles.postBtn}
+            >
+              <Text style={styles.postBtnText}>+ Post</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
+            <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
-        )}
-        {!isOwnProfile && <View style={{ width: 60 }} />}
+        </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero */}
         <View style={styles.hero}>
           <View style={styles.avatarCircle}>
             <Text style={styles.avatarEmoji}>🏛️</Text>
@@ -77,14 +87,12 @@ export default function ShelterProfile() {
           <Text style={styles.address}>📍 {displayAddress}</Text>
         </View>
 
-        {/* Quick stats */}
         <View style={styles.statsRow}>
           <StatItem emoji="🐾" label="Animals" value={String(pets.length)} />
           <StatItem emoji="💰" label="Fee" value={displayFee} />
           <StatItem emoji="🏠" label="Home visit" value={displayVisit} />
         </View>
 
-        {/* Contact */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contact</Text>
           <InfoRow emoji="📞" label="Phone" value={displayPhone} />
@@ -92,7 +100,6 @@ export default function ShelterProfile() {
           <InfoRow emoji="🕐" label="Hours" value={displayHours} />
         </View>
 
-        {/* Adoption info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Adoption Info</Text>
           <InfoRow emoji="💰" label="Adoption fee" value={displayFee} />
@@ -100,71 +107,69 @@ export default function ShelterProfile() {
           <InfoRow emoji="💉" label="Vaccination records" value={displayVax} />
         </View>
 
-        {/* About */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About Us</Text>
           <Text style={styles.aboutText}>{displayAbout}</Text>
         </View>
 
-        {/* Post button for own profile */}
         {isOwnProfile && (
-  <TouchableOpacity
-    onPress={() => router.push('/shelter/post')}
-    activeOpacity={0.85}
-    style={styles.postAnimalBtn}
-  >
-    <Text style={styles.postAnimalText}>+ Add Animal Listing</Text>
-  </TouchableOpacity>
-)}
+          <TouchableOpacity
+            onPress={() => router.push('/shelter/post')}
+            activeOpacity={0.85}
+            style={styles.postAnimalBtn}
+          >
+            <Text style={styles.postAnimalText}>+ Add Animal Listing</Text>
+          </TouchableOpacity>
+        )}
 
-        {/* Animal grid */}
-<View style={styles.section}>
-  <Text style={styles.sectionTitle}>
-    {isOwnProfile ? 'Manage Available Animals' : 'Available Animals'}
-  </Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {isOwnProfile ? 'Manage Available Animals' : 'Available Animals'}
+          </Text>
 
-  {isOwnProfile && (
-    <Text style={styles.manageHint}>
-      Tap an animal to edit or remove its listing.
-    </Text>
-  )}
+          {isOwnProfile && (
+            <Text style={styles.manageHint}>
+              Tap an animal to edit or remove its listing.
+            </Text>
+          )}
 
-  {pets.length > 0 ? (
-    <View style={styles.grid}>
-      {pets.map((pet) => (
-        <TouchableOpacity
-          key={pet.id}
-          style={styles.gridItem}
-          activeOpacity={0.85}
-          onPress={
-            isOwnProfile
-              ? () =>
-                  router.push({
-                    pathname: '/shelter/post',
-                    params: { petId: pet.id },
-                  })
-              : undefined
-          }
-        >
-          <Image source={{ uri: pet.media[0]?.uri }} style={styles.gridImage} />
+          {pets.length > 0 ? (
+            <View style={styles.grid}>
+              {pets.map((pet) => (
+                <TouchableOpacity
+                  key={pet.id}
+                  style={styles.gridItem}
+                  activeOpacity={0.85}
+                  onPress={
+                    isOwnProfile
+                      ? () =>
+                          router.push({
+                            pathname: '/shelter/post',
+                            params: { petId: pet.id },
+                          })
+                      : undefined
+                  }
+                >
+                  <Image source={{ uri: pet.media[0]?.uri }} style={styles.gridImage} />
 
-          <View style={styles.gridOverlay}>
-            <Text style={styles.gridPetName}>{pet.name}</Text>
-            {isOwnProfile && (
-              <Text style={styles.gridManageText}>Tap to manage</Text>
-            )}
-          </View>
-        </TouchableOpacity>
-      ))}
-    </View>
-  ) : (
-    <Text style={styles.emptyText}>
-      {isOwnProfile
-        ? 'No animal listings yet. Add your first available animal.'
-        : 'No available animals listed right now.'}
-    </Text>
-  )}
-</View>
+                  <View style={styles.gridOverlay}>
+                    <Text style={styles.gridPetName}>{pet.name}</Text>
+                    {isOwnProfile && (
+                      <Text style={styles.gridManageText}>Tap to manage</Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.emptyText}>
+              {isOwnProfile
+                ? 'No animal listings yet. Add your first available animal.'
+                : 'No available animals listed right now.'}
+            </Text>
+          )}
+        </View>
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
@@ -204,6 +209,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    gap: 8,
   },
   backBtn: {
     width: 40,
@@ -216,20 +222,38 @@ const styles = StyleSheet.create({
     color: '#444',
   },
   headerTitle: {
+    flex: 1,
     fontSize: 17,
     fontWeight: '700',
     color: '#1A1A2E',
+    textAlign: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   postBtn: {
     backgroundColor: '#F97316',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
   },
   postBtnText: {
     color: '#fff',
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: 13,
+  },
+  logoutBtn: {
+    backgroundColor: '#444',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  logoutText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 12,
   },
   hero: {
     alignItems: 'center',
@@ -389,22 +413,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   manageHint: {
-  fontSize: 14,
-  color: '#777',
-  marginBottom: 14,
-  lineHeight: 20,
-},
-
-gridManageText: {
-  color: '#fff',
-  fontSize: 9,
-  fontWeight: '500',
-  marginTop: 2,
-},
-
-emptyText: {
-  fontSize: 14,
-  color: '#777',
-  lineHeight: 20,
-},
+    fontSize: 14,
+    color: '#777',
+    marginBottom: 14,
+    lineHeight: 20,
+  },
+  gridManageText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#777',
+    lineHeight: 20,
+  },
 });
