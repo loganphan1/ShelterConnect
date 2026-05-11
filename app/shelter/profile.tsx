@@ -13,10 +13,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MOCK_SHELTERS } from '@/data/mockPets';
 import type { Pet } from '@/data/mockPets';
 import { useUserStore } from '@/store/userStore';
 import { useFeedStore } from '@/store/feedStore';
+import { useEffect } from 'react';
+import { fetchShelterById, fetchPetsByShelterId } from '@/services/petService';
+import type { Shelter } from '@/data/mockPets';
 
 const { width, height } = Dimensions.get('window');
 const GRID_ITEM = (width - 56) / 3;
@@ -27,29 +29,45 @@ export default function ShelterProfile() {
   const feedItems = useFeedStore((s) => s.feedItems);
   const savedPetIds = useUserStore((s) => s.savedPetIds);
   const toggleSave = useUserStore((s) => s.toggleSave);
+  const [viewedShelter, setViewedShelter] = useState<Partial<Shelter> | null>(null);
+  const [viewedPets, setViewedPets] = useState<Pet[]>([]);
+  useEffect(() => {
+  async function loadShelterData() {
+    if (!params.shelterId) return;
 
+    try {
+      const shelter = await fetchShelterById(params.shelterId);
+      const pets = await fetchPetsByShelterId(params.shelterId);
+
+      setViewedShelter(shelter);
+      setViewedPets(pets);
+    } catch (error) {
+      console.log('Failed to load shelter:', error);
+    }
+  }
+
+  loadShelterData();
+}, [params.shelterId]);
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
+const isOwnProfile = !params.shelterId || params.fromOnboarding === '1';
 
-  const shelter = params.shelterId
-    ? MOCK_SHELTERS.find((s) => s.id === params.shelterId)
-    : null;
+const activeShelter = isOwnProfile ? shelterProfile : viewedShelter;
 
-  const isOwnProfile = !params.shelterId || params.fromOnboarding === '1';
+const displayName = activeShelter?.name ?? 'Shelter';
+const displayPhone = activeShelter?.phone ?? '—';
+const displayAddress = activeShelter?.address ?? '—';
+const displayAbout =
+  activeShelter?.about ??
+  'Welcome to our shelter. We are dedicated to finding loving homes for every animal in our care.';
+const displayHours = activeShelter?.hours ?? 'Mon–Fri 9am–5pm';
+const displayFee = (activeShelter as any)?.adoptionFee ?? '—';
+const displayVisit = (activeShelter as any)?.requiresHomeVisit ?? '—';
+const displayVax = (activeShelter as any)?.vaccinationPolicy ?? '—';
+const shelterId = params.shelterId ?? shelterProfile?.id;
 
-  const displayName    = shelter?.name    ?? shelterProfile?.name    ?? 'My Shelter';
-  const displayPhone   = shelter?.phone   ?? shelterProfile?.phone   ?? '—';
-  const displayAddress = shelter?.address ?? shelterProfile?.address ?? '—';
-  const displayAbout   = shelter?.about   ?? 'Welcome to our shelter. We are dedicated to finding loving homes for every animal in our care.';
-  const displayHours   = shelter?.hours   ?? 'Mon–Fri 9am–5pm';
-  const displayFee     = shelter?.adoptionFee ?? (shelterProfile as any)?.adoptionFee ?? '—';
-  const displayVisit   = shelter?.requiresHomeVisit ?? (shelterProfile as any)?.requiresHomeVisit ?? '—';
-  const displayVax     = shelter?.vaccinationPolicy ?? (shelterProfile as any)?.vaccinationPolicy ?? '—';
-
-  const shelterId = params.shelterId ?? 's1';
-  const pets = isOwnProfile
-    ? feedItems.filter((p) => p.shelterId === 'user_shelter')
-    : feedItems.filter((p) => p.shelterId === shelterId);
-
+const pets = isOwnProfile
+  ? feedItems.filter((p) => p.shelterId === shelterId)
+  : viewedPets;
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
@@ -59,9 +77,18 @@ export default function ShelterProfile() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Shelter Profile</Text>
         {isOwnProfile ? (
-          <TouchableOpacity onPress={() => router.push('/shelter/post')} style={styles.postBtn}>
-            <Text style={styles.postBtnText}>+ Post</Text>
-          </TouchableOpacity>
+    <View style={{ flexDirection: 'row', gap: 8 }}>
+      <TouchableOpacity
+        onPress={() => router.push('/shelter/questionnaire')}
+        style={styles.editBtn}
+      >
+        <Text style={styles.editBtnText}>Edit</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push('/shelter/post')} style={styles.postBtn}>
+        <Text style={styles.postBtnText}>+ Post</Text>
+      </TouchableOpacity>
+    </View>
         ) : (
           <View style={{ width: 60 }} />
         )}
@@ -305,7 +332,19 @@ function InfoRow({ emoji, label, value }: { emoji: string; label: string; value:
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF8F0' },
-
+  editBtn: {
+    backgroundColor: '#FFF3E8',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#F97316',
+  },
+  editBtnText: {
+    color: '#F97316',
+    fontWeight: '700',
+    fontSize: 14,
+  },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',

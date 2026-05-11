@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -40,11 +41,13 @@ export default function ShelterQuestionnaire() {
     setAnswers((prev) => ({ ...prev, [question.id]: value }));
   }
 
-  function goNext() {
+  async function goNext() {
+  try {
     const value =
       (answers[question.id] || '').trim() ||
       (question.type === 'text' || question.type === 'phone' ? question.defaultValue : '');
-    setShelterProfile({ [question.id]: value } as any);
+
+    await setShelterProfile({ [question.id]: value } as any);
 
     if (isLast) {
       router.replace({ pathname: '/shelter/profile', params: { fromOnboarding: '1' } });
@@ -53,7 +56,15 @@ export default function ShelterQuestionnaire() {
 
     setAnimKey((k) => k + 1);
     setCurrentIndex((i) => i + 1);
+  } catch (error) {
+    Alert.alert(
+      'Login required',
+      'Please verify your email and log in before completing shelter setup.'
+    );
+
+    router.replace('/auth/login');
   }
+}
 
 function goBack() {
   if (currentIndex === 0) {

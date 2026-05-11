@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import Animated, {
   FadeInRight,
@@ -15,8 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import EmojiButton from '@/components/EmojiButton';
 import ProgressBar from '@/components/ProgressBar';
 import { OWNER_QUESTIONS } from '@/data/ownerQuestions';
-import { matchPets } from '@/lib/matching';
-import { MOCK_PETS } from '@/data/mockPets';
+import { fetchPetsForOwner } from '@/services/petService';
 import { useFeedStore } from '@/store/feedStore';
 import { useUserStore } from '@/store/userStore';
 
@@ -46,18 +46,27 @@ export default function OwnerQuestionnaire() {
   }
 
 async function goNext() {
-  await setOwnerAnswer(question.id, answers[question.id]);
+  try {
+    await setOwnerAnswer(question.id, answers[question.id]);
 
-  if (isLast) {
-    const allAnswers = { ...ownerAnswers, [question.id]: answers[question.id] };
-    const matched = matchPets(MOCK_PETS, allAnswers);
-    setFeedItems(matched);
-    router.replace('/owner/feed');
-    return;
+    if (isLast) {
+      const allAnswers = { ...ownerAnswers, [question.id]: answers[question.id] };
+      const matched = await fetchPetsForOwner(allAnswers);
+      setFeedItems(matched);
+      router.replace('/owner/feed');
+      return;
+    }
+
+    setAnimKey((k) => k + 1);
+    setCurrentIndex((i) => i + 1);
+  } catch (error) {
+    Alert.alert(
+      'Login required',
+      'Please verify your email and log in before completing the questionnaire.'
+    );
+
+    router.replace('/auth/login');
   }
-
-  setAnimKey((k) => k + 1);
-  setCurrentIndex((i) => i + 1);
 }
 
 function goBack() {

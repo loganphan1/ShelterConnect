@@ -15,9 +15,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { createPet, markPetUnavailable } from '@/services/petService';
 import { useFeedStore } from '@/store/feedStore';
 import { useUserStore } from '@/store/userStore';
-import type { Pet } from '@/data/mockPets';
 
 type PetType = 'dog' | 'cat';
 type PetSize = 'small' | 'medium' | 'large';
@@ -26,11 +26,9 @@ type PetAge = 'young' | 'adult' | 'senior';
 export default function ShelterPost() {
   const params = useLocalSearchParams<{ petId?: string | string[] }>();
 
-  const petId = Array.isArray(params.petId)
-    ? params.petId[0]
-    : params.petId;
+  const petId = Array.isArray(params.petId) ? params.petId[0] : params.petId;
+
   const addPost = useFeedStore((s) => s.addPost);
-  const editPost = useFeedStore((s) => s.editPost);
   const deletePost = useFeedStore((s) => s.deletePost);
   const feedItems = useFeedStore((s) => s.feedItems);
   const shelterProfile = useUserStore((s) => s.shelterProfile);
@@ -38,8 +36,12 @@ export default function ShelterPost() {
   const existingPet = petId ? feedItems.find((p) => p.id === petId) : null;
   const isEditing = !!existingPet;
 
-  const [mediaUri, setMediaUri] = useState<string | null>(existingPet?.media[0]?.uri ?? null);
-  const [mediaType, setMediaType] = useState<'image' | 'video'>(existingPet?.media[0]?.type ?? 'image');
+  const [mediaUri, setMediaUri] = useState<string | null>(
+    existingPet?.media[0]?.uri ?? null
+  );
+  const [mediaType, setMediaType] = useState<'image' | 'video'>(
+    existingPet?.media[0]?.type ?? 'image'
+  );
   const [name, setName] = useState(existingPet?.name ?? '');
   const [breed, setBreed] = useState(existingPet?.breed ?? '');
   const [ageDisplay, setAgeDisplay] = useState(existingPet?.ageDisplay ?? '');
@@ -47,13 +49,19 @@ export default function ShelterPost() {
   const [petType, setPetType] = useState<PetType>(existingPet?.type ?? 'dog');
   const [petSize, setPetSize] = useState<PetSize>(existingPet?.size ?? 'medium');
   const [petAge, setPetAge] = useState<PetAge>(existingPet?.age ?? 'adult');
+  const [submitting, setSubmitting] = useState(false);
 
   async function pickMedia(type: 'photo' | 'video') {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please allow access to your photo library in Settings.');
+      Alert.alert(
+        'Permission needed',
+        'Please allow access to your photo library in Settings.'
+      );
       return;
     }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: type === 'photo' ? ['images'] : ['videos'],
       allowsEditing: true,
@@ -69,10 +77,15 @@ export default function ShelterPost() {
 
   async function takePhoto() {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please allow camera access in Settings.');
+      Alert.alert(
+        'Permission needed',
+        'Please allow camera access in Settings.'
+      );
       return;
     }
+
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       quality: 0.85,
@@ -85,95 +98,110 @@ export default function ShelterPost() {
     }
   }
 
-  function submit() {
-  if (!mediaUri) {
-    Alert.alert('Photo required', 'Please add at least one photo or video for this animal.');
-    return;
-  }
-
-  const trimmedName = name.trim();
-
-  const pet: Pet = {
-    id: existingPet?.id ?? `user_${Date.now()}`,
-    name: trimmedName || 'Unnamed Pet',
-    breed: breed.trim() || 'Mixed breed',
-    type: petType,
-    size: petSize,
-    age: petAge,
-    ageDisplay: ageDisplay.trim() || 'Unknown age',
-    energyLevel: existingPet?.energyLevel ?? 'medium',
-    goodWithKids: existingPet?.goodWithKids ?? true,
-    goodWithPets: existingPet?.goodWithPets ?? true,
-    hypoallergenic: existingPet?.hypoallergenic ?? false,
-    needsYard: existingPet?.needsYard ?? false,
-    media: [{ type: mediaType, uri: mediaUri }],
-    bio:
-      bio.trim() ||
-      `Meet ${trimmedName || 'this pet'}! Looking for a loving forever home.`,
-    shelterId: existingPet?.shelterId ?? 'user_shelter',
-    distanceMiles: existingPet?.distanceMiles ?? 0,
-  };
-
-  if (isEditing) {
-    editPost(pet);
-  } else {
-    addPost(pet);
-  }
-
-  router.replace({
-    pathname: '/shelter/profile',
-    params: { fromOnboarding: '1' },
-  });
-}
-
-  function confirmDelete() {
-  if (!petId) {
-    Alert.alert('Error', 'Could not find this animal listing.');
-    return;
-  }
-
-  const removePet = () => {
-    console.log('Deleting pet with id:', petId);
-
-    deletePost(petId);
-
-    router.replace({
-      pathname: '/shelter/profile',
-      params: { fromOnboarding: '1' },
-    });
-  };
-
-  if (Platform.OS === 'web') {
-    const confirmed = window.confirm(
-      `Are you sure you want to remove ${
-        existingPet?.name ?? 'this animal'
-      }? This animal will no longer appear as available.`
-    );
-
-    if (confirmed) {
-      removePet();
+  async function submit() {
+    console.log('Submitting pet...');
+    console.log('shelterProfile:', shelterProfile);
+    console.log('mediaUri:', mediaUri);
+    if (!mediaUri) {
+      Alert.alert('Missing photo', 'Please add a photo before posting.');
+      return;
     }
 
-    return;
+    if (!shelterProfile?.id) {
+      Alert.alert(
+        'Missing shelter profile',
+        'Please complete your shelter profile before posting pets.'
+      );
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const newPet = await createPet({
+        shelterId: shelterProfile.id,
+        name: name.trim() || 'Unnamed Pet',
+        breed: breed.trim() || 'Mixed breed',
+        type: petType,
+        size: petSize,
+        age: petAge,
+        ageDisplay: ageDisplay.trim() || 'Unknown age',
+        energyLevel: 'medium',
+        goodWithKids: true,
+        goodWithPets: true,
+        hypoallergenic: false,
+        needsYard: false,
+        bio:
+          bio.trim() ||
+          `Meet ${name.trim() || 'this animal'}! Looking for a loving forever home.`,
+        media: [{ type: mediaType, uri: mediaUri }],
+      });
+
+      addPost(newPet);
+
+      router.replace({
+        pathname: '/shelter/profile',
+        params: { fromOnboarding: '1' },
+      });
+    } catch (error) {
+      Alert.alert(
+        'Post failed',
+        error instanceof Error ? error.message : 'Could not create pet post.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  Alert.alert(
-    'Remove listing',
-    `Are you sure you want to remove ${
+  async function removePet() {
+    if (!petId) {
+      Alert.alert('Error', 'Could not find this animal listing.');
+      return;
+    }
+
+    try {
+      await markPetUnavailable(petId);
+      deletePost(petId);
+
+      router.replace({
+        pathname: '/shelter/profile',
+        params: { fromOnboarding: '1' },
+      });
+    } catch (error) {
+      Alert.alert(
+        'Delete failed',
+        error instanceof Error ? error.message : 'Could not remove pet listing.'
+      );
+    }
+  }
+
+  function confirmDelete() {
+    if (!petId) {
+      Alert.alert('Error', 'Could not find this animal listing.');
+      return;
+    }
+
+    const message = `Are you sure you want to remove ${
       existingPet?.name ?? 'this animal'
-    }? This animal will no longer appear as available.`,
-    [
+    }? This animal will no longer appear as available.`;
+
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(message);
+      if (confirmed) void removePet();
+      return;
+    }
+
+    Alert.alert('Remove listing', message, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove',
         style: 'destructive',
-        onPress: removePet,
+        onPress: () => void removePet(),
       },
-    ]
-  );
-}
+    ]);
+  }
 
-  const canSubmit = mediaUri !== null;
+  const canSubmit = mediaUri !== null && !submitting;
 
   return (
     <KeyboardAvoidingView
@@ -181,29 +209,40 @@ export default function ShelterPost() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <SafeAreaView style={styles.container}>
-        {/* Header */}
         <LinearGradient colors={['#FFF3E8', '#FFF8F2']} style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backIcon}>←</Text>
           </TouchableOpacity>
+
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>{isEditing ? 'Edit Listing' : 'Post an Animal'}</Text>
-            <Text style={styles.headerSub}>{isEditing ? 'Update your listing' : 'Share an animal looking for a home'}</Text>
+            <Text style={styles.headerTitle}>
+              {isEditing ? 'Edit Listing' : 'Post an Animal'}
+            </Text>
+            <Text style={styles.headerSub}>
+              {isEditing ? 'Update your listing' : 'Share an animal looking for a home'}
+            </Text>
           </View>
+
           <TouchableOpacity
             style={[styles.submitBtn, !canSubmit && styles.submitBtnDisabled]}
             onPress={canSubmit ? submit : undefined}
+            disabled={!canSubmit}
           >
-            <Text style={styles.submitBtnText}>{isEditing ? 'Save' : 'Post'}</Text>
+            <Text style={styles.submitBtnText}>
+              {submitting ? 'Posting...' : isEditing ? 'Save' : 'Post'}
+            </Text>
           </TouchableOpacity>
         </LinearGradient>
 
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-          {/* Media picker */}
           <View style={styles.mediaPicker}>
             {mediaUri ? (
               <View style={styles.mediaPreview}>
-                <Image source={{ uri: mediaUri }} style={styles.previewImage} resizeMode="cover" />
+                <Image
+                  source={{ uri: mediaUri }}
+                  style={styles.previewImage}
+                  resizeMode="cover"
+                />
                 <TouchableOpacity
                   style={styles.changeMediaBtn}
                   onPress={() => setMediaUri(null)}
@@ -213,15 +252,23 @@ export default function ShelterPost() {
               </View>
             ) : (
               <View style={styles.mediaButtons}>
-                <TouchableOpacity style={styles.mediaBtn} onPress={() => pickMedia('photo')}>
+                <TouchableOpacity
+                  style={styles.mediaBtn}
+                  onPress={() => pickMedia('photo')}
+                >
                   <Text style={styles.mediaBtnEmoji}>🖼️</Text>
                   <Text style={styles.mediaBtnLabel}>Photo library</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={styles.mediaBtn} onPress={takePhoto}>
                   <Text style={styles.mediaBtnEmoji}>📷</Text>
                   <Text style={styles.mediaBtnLabel}>Take photo</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.mediaBtn} onPress={() => pickMedia('video')}>
+
+                <TouchableOpacity
+                  style={styles.mediaBtn}
+                  onPress={() => pickMedia('video')}
+                >
                   <Text style={styles.mediaBtnEmoji}>🎥</Text>
                   <Text style={styles.mediaBtnLabel}>Video</Text>
                 </TouchableOpacity>
@@ -229,9 +276,8 @@ export default function ShelterPost() {
             )}
           </View>
 
-          {/* Form */}
           <View style={styles.form}>
-            <Field label="Pet name *" placeholder="e.g. Buddy">
+            <Field label="Pet name *">
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Buddy"
@@ -244,7 +290,7 @@ export default function ShelterPost() {
               />
             </Field>
 
-            <Field label="Breed" placeholder="">
+            <Field label="Breed">
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Golden Retriever Mix"
@@ -257,7 +303,7 @@ export default function ShelterPost() {
               />
             </Field>
 
-            <Field label="Age" placeholder="">
+            <Field label="Age">
               <TextInput
                 style={styles.input}
                 placeholder="e.g. 2 years"
@@ -270,7 +316,6 @@ export default function ShelterPost() {
               />
             </Field>
 
-            {/* Type toggle */}
             <Text style={styles.fieldLabel}>Type</Text>
             <View style={styles.toggleRow}>
               {(['dog', 'cat'] as PetType[]).map((t) => (
@@ -286,7 +331,6 @@ export default function ShelterPost() {
               ))}
             </View>
 
-            {/* Size toggle */}
             <Text style={styles.fieldLabel}>Size</Text>
             <View style={styles.toggleRow}>
               {(['small', 'medium', 'large'] as PetSize[]).map((s) => (
@@ -302,7 +346,6 @@ export default function ShelterPost() {
               ))}
             </View>
 
-            {/* Age category */}
             <Text style={styles.fieldLabel}>Life stage</Text>
             <View style={styles.toggleRow}>
               {(['young', 'adult', 'senior'] as PetAge[]).map((a) => (
@@ -318,7 +361,7 @@ export default function ShelterPost() {
               ))}
             </View>
 
-            <Field label="Bio" placeholder="">
+            <Field label="Bio">
               <TextInput
                 style={[styles.input, styles.bioInput]}
                 placeholder="Tell adopters about this animal's personality..."
@@ -350,11 +393,9 @@ export default function ShelterPost() {
 
 function Field({
   label,
-  placeholder,
   children,
 }: {
   label: string;
-  placeholder: string;
   children: React.ReactNode;
 }) {
   return (

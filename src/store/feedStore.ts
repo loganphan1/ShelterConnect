@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Pet, MOCK_PETS } from '@/data/mockPets';
+import { Pet } from '@/data/mockPets';
 
 type FeedStore = {
   feedItems: Pet[];
@@ -10,11 +10,15 @@ type FeedStore = {
 };
 
 export const useFeedStore = create<FeedStore>((set) => ({
-  feedItems: MOCK_PETS,
+  feedItems: [],
   setFeedItems: (items) => set({ feedItems: items }),
   addPost: (pet) => set((state) => ({ feedItems: [pet, ...state.feedItems] })),
   editPost: (pet) =>
-    set((state) => ({ feedItems: state.feedItems.map((p) => (p.id === pet.id ? pet : p)) })),
+    set((state) => ({
+      feedItems: state.feedItems.map((p) => (p.id === pet.id ? pet : p)),
+    })),
   deletePost: (petId) =>
-    set((state) => ({ feedItems: state.feedItems.filter((p) => p.id !== petId) })),
+    set((state) => ({
+      feedItems: state.feedItems.filter((p) => p.id !== petId),
+    })),
 }));
