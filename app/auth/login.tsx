@@ -44,33 +44,55 @@ export default function Login() {
   }
 
   async function handleLogin() {
-    if (!email || !password) {
-      Alert.alert('Missing fields', 'Please enter your email and password.');
-      return;
-    }
-
-    setLoading(true);
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-
-    setLoading(false);
-
-    if (error || !data.user) {
-      Alert.alert('Login failed', error?.message ?? 'Incorrect email or password.');
-      return;
-    }
-
-    await signIn(
-      data.user.id,
-      data.user.email ?? email,
-      data.user.user_metadata?.full_name
-    );
-
-    navigateAfterAuth();
+  if (!email || !password) {
+    Alert.alert('Missing fields', 'Please enter your email and password.');
+    return;
   }
+
+  setLoading(true);
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  });
+
+  setLoading(false);
+
+  if (error) {
+    const message = error.message.toLowerCase();
+
+    if (
+      message.includes('email not confirmed') ||
+      message.includes('email_not_confirmed') ||
+      message.includes('not confirmed')
+    ) {
+      Alert.alert(
+        'Verify your email',
+        'Please verify your email before logging in. Check your inbox for the confirmation email, then try again.'
+      );
+      return;
+    }
+
+    Alert.alert('Login failed', error.message);
+    return;
+  }
+
+  if (!data.session || !data.user) {
+    Alert.alert(
+      'Verify your email',
+      'Please verify your email before logging in. Check your inbox for the confirmation email, then try again.'
+    );
+    return;
+  }
+
+  await signIn(
+    data.user.id,
+    data.user.email ?? email.trim(),
+    data.user.user_metadata?.full_name
+  );
+
+  navigateAfterAuth();
+}
 
   return (
     <SafeAreaView style={styles.safe}>

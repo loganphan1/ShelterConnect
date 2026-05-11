@@ -8,6 +8,11 @@ import {
   upsertOwnerPreferences,
   upsertShelterProfile,
 } from '@/services/userService';
+import {
+  getSavedPetIds,
+  savePet,
+  unsavePet,
+} from '@/services/savedPetService';
 
 export type UserRole = 'owner' | 'shelter' | null;
 
@@ -38,7 +43,7 @@ type UserStore = {
   setRole: (role: UserRole) => Promise<void>;
   setOwnerAnswer: (questionId: string, value: string) => Promise<void>;
   setShelterProfile: (profile: Partial<Shelter>) => Promise<void>;
-  toggleSave: (petId: string) => void;
+  toggleSave: (petId: string) => Promise<void>;
   reset: () => void;
 };
 
@@ -59,16 +64,17 @@ export const useUserStore = create<UserStore>((set, get) => ({
     });
 
     // Restore persisted data from Supabase
-    const [profile, prefs, shelter] = await Promise.all([
+    const [profile, prefs, shelter, savedIds] = await Promise.all([
       getProfile(userId),
       getOwnerPreferences(userId),
       getShelterByUserId(userId),
+      getSavedPetIds(userId),
     ]);
-
     set({
       role: (profile?.role as UserRole) ?? null,
       ownerAnswers: prefs ?? {},
       shelterProfile: shelter ?? null,
+      savedPetIds: savedIds,
     });
   },
 
@@ -82,25 +88,70 @@ export const useUserStore = create<UserStore>((set, get) => ({
   },
 
   setOwnerAnswer: async (questionId, value) => {
-    const newAnswers = { ...get().ownerAnswers, [questionId]: value };
-    set({ ownerAnswers: newAnswers });
-    const { userId } = get();
-    if (userId) await upsertOwnerPreferences(userId, newAnswers);
-  },
+  const { userId, ownerAnswers } = get();
+
+  if (!userId) {
+    throw new Error('Please verify your email and log in first.');
+  }
+
+  const newAnswers = { ...ownerAnswers, [questionId]: value };
+  set({ ownerAnswers: newAnswers });
+
+  try {
+    await upsertOwnerPreferences(userId, newAnswers);
+  } catch (error) {
+    set({ ownerAnswers });
+    throw error;
+  }
+},
 
   setShelterProfile: async (profile) => {
-    const merged = { ...get().shelterProfile, ...profile };
-    set({ shelterProfile: merged });
-    const { userId } = get();
-    if (userId) await upsertShelterProfile(userId, merged);
-  },
+  const { userId, shelterProfile } = get();
 
-  toggleSave: (petId) =>
-    set((state) => ({
-      savedPetIds: state.savedPetIds.includes(petId)
-        ? state.savedPetIds.filter((id) => id !== petId)
-        : [...state.savedPetIds, petId],
-    })),
+  if (!userId) {
+    throw new Error('Please verify your email and log in first.');
+  }
+
+  const merged = { ...shelterProfile, ...profile };
+  set({ shelterProfile: merged });
+
+  try {
+    await upsertShelterProfile(userId, merged);
+  } catch (error) {
+    set({ shelterProfile });
+    throw error;
+  }
+},
+
+  toggleSave: async (petId) => {
+  const { userId, savedPetIds } = get();
+
+  if (!userId) {
+    throw new Error('You must be logged in to save pets.');
+  }
+
+  const isSaved = savedPetIds.includes(petId);
+
+  if (isSaved) {
+    set({ savedPetIds: savedPetIds.filter((id) => id !== petId) });
+
+    try {
+      await unsavePet(userId, petId);
+    } catch (error) {
+      set({ savedPetIds });
+      throw error;
+    }
+  } else {
+    set({ savedPetIds: [...savedPetIds, petId] });
+
+    try {
+      await savePet(userId, petId);
+    } catch (error) {
+      set({ savedPetIds });
+      throw error;
+    }
+  }
+},
 
   reset: () => set({ role: null, ownerAnswers: {}, shelterProfile: null, savedPetIds: [] }),
 }));

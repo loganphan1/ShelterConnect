@@ -31,33 +31,57 @@ export default function SignUp() {
   }
 
   async function handleSignUp() {
-    if (!email || !password || !confirm) {
-      Alert.alert('Missing fields', 'Please fill in all fields.');
-      return;
-    }
-
-    if (password !== confirm) {
-      Alert.alert('Password mismatch', 'Passwords do not match.');
-      return;
-    }
-
-    setLoading(true);
-
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-    });
-
-    setLoading(false);
-
-    if (error || !data.user) {
-      Alert.alert('Sign-up failed', error?.message ?? 'Could not create account.');
-      return;
-    }
-
-    await signIn(data.user.id, data.user.email ?? email.trim());
-    navigateAfterAuth();
+  if (!email || !password || !confirm) {
+    Alert.alert('Missing fields', 'Please fill in all fields.');
+    return;
   }
+
+  if (password !== confirm) {
+    Alert.alert('Password mismatch', 'Passwords do not match.');
+    return;
+  }
+
+  setLoading(true);
+
+  console.log('Trying signup with:', email.trim());
+
+const { data, error } = await supabase.auth.signUp({
+  email: email.trim(),
+  password,
+});
+
+console.log('Signup data:', data);
+console.log('Signup error:', error);
+  // const { data, error } = await supabase.auth.signUp({
+  //   email: email.trim(),
+  //   password,
+  // });
+
+  setLoading(false);
+
+  if (error) {
+    Alert.alert('Sign-up failed', error.message);
+    return;
+  }
+
+  if (!data.session) {
+    Alert.alert(
+      'Verify your email',
+      'Your account was created, but you need to verify your email before logging in. Please check your inbox, then log in.'
+    );
+
+    router.replace('/auth/login');
+    return;
+  }
+
+  if (!data.user) {
+    Alert.alert('Sign-up failed', 'Could not create account.');
+    return;
+  }
+
+  await signIn(data.user.id, data.user.email ?? email.trim());
+  navigateAfterAuth();
+}
 
   return (
     <SafeAreaView style={styles.safe}>
