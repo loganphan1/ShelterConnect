@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -72,14 +73,18 @@ export default function ShelterQuestionnaire() {
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
-        <View style={styles.topBar}>
+        <LinearGradient colors={['#FFF3E8', '#FFF8F2']} style={styles.topBar}>
           <TouchableOpacity onPress={goBack} style={styles.backBtn}>
             <Text style={styles.backIcon}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.stepText}>
-            {currentIndex + 1} / {SHELTER_QUESTIONS.length}
-          </Text>
-        </View>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerLabel}>🏛️ Shelter Setup</Text>
+            <Text style={styles.stepText}>{currentIndex + 1} of {SHELTER_QUESTIONS.length}</Text>
+          </View>
+          <View style={styles.stepBadge}>
+            <Text style={styles.stepBadgeText}>{Math.round(((currentIndex + 1) / SHELTER_QUESTIONS.length) * 100)}%</Text>
+          </View>
+        </LinearGradient>
 
         <ProgressBar
           progress={progress}
@@ -142,14 +147,17 @@ export default function ShelterQuestionnaire() {
         </Animated.View>
 
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.nextButton}
-            onPress={goNext}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.nextButtonText}>
-              {isLast ? 'Create profile 🏛️' : 'Next →'}
-            </Text>
+          <TouchableOpacity onPress={goNext} activeOpacity={0.85}>
+            <LinearGradient
+              colors={['#F97316', '#EC4899']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.nextButton}
+            >
+              <Text style={styles.nextButtonText}>
+                {isLast ? 'Create profile 🏛️' : 'Next →'}
+              </Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -166,23 +174,48 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FFE4CC',
   },
   backBtn: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#FFE4CC',
+    borderRadius: 19,
   },
   backIcon: {
-    fontSize: 22,
-    color: '#444',
+    fontSize: 18,
+    color: '#F97316',
+    fontWeight: '700',
+  },
+  headerCenter: {
+    alignItems: 'center',
+  },
+  headerLabel: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#1A1A2E',
   },
   stepText: {
-    fontSize: 15,
-    color: '#999',
+    fontSize: 12,
+    color: '#F97316',
     fontWeight: '600',
+    marginTop: 1,
+  },
+  stepBadge: {
+    backgroundColor: '#F97316',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  stepBadgeText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
   },
   questionContainer: {
     flex: 1,
@@ -205,17 +238,17 @@ const styles = StyleSheet.create({
   },
   textInput: {
     marginHorizontal: 8,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFAF7',
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 18,
     fontSize: 18,
     color: '#1A1A2E',
     borderWidth: 2,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
+    borderColor: '#FFE4CC',
+    shadowColor: '#F97316',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.07,
     shadowRadius: 8,
     elevation: 2,
   },
@@ -231,20 +264,14 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   nextButton: {
-    backgroundColor: '#F97316',
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
     shadowColor: '#F97316',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 12,
     elevation: 6,
-  },
-  nextButtonDisabled: {
-    backgroundColor: '#ccc',
-    shadowOpacity: 0,
-    elevation: 0,
   },
   nextButtonText: {
     color: '#fff',

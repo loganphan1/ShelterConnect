@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -181,18 +182,21 @@ export default function ShelterPost() {
     >
       <SafeAreaView style={styles.container}>
         {/* Header */}
-        <View style={styles.topBar}>
+        <LinearGradient colors={['#FFF3E8', '#FFF8F2']} style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backIcon}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{isEditing ? 'Edit Listing' : 'Post an Animal'}</Text>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>{isEditing ? 'Edit Listing' : 'Post an Animal'}</Text>
+            <Text style={styles.headerSub}>{isEditing ? 'Update your listing' : 'Share an animal looking for a home'}</Text>
+          </View>
           <TouchableOpacity
             style={[styles.submitBtn, !canSubmit && styles.submitBtnDisabled]}
             onPress={canSubmit ? submit : undefined}
           >
             <Text style={styles.submitBtnText}>{isEditing ? 'Save' : 'Post'}</Text>
           </TouchableOpacity>
-        </View>
+        </LinearGradient>
 
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           {/* Media picker */}
@@ -373,31 +377,50 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0E6FF',
+    borderBottomColor: '#FFE4CC',
   },
   backBtn: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#FFE4CC',
+    borderRadius: 19,
   },
   backIcon: {
-    fontSize: 22,
-    color: '#444',
+    fontSize: 18,
+    color: '#F97316',
+    fontWeight: '700',
+  },
+  headerCenter: {
+    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
     color: '#1A1A2E',
+  },
+  headerSub: {
+    fontSize: 11,
+    color: '#F97316',
+    fontWeight: '600',
+    marginTop: 1,
   },
   submitBtn: {
     backgroundColor: '#F97316',
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
+    shadowColor: '#F97316',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   submitBtnDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#D1D5DB',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   submitBtnText: {
     color: '#fff',
@@ -412,10 +435,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
+    shadowColor: '#F97316',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     elevation: 3,
   },
   mediaButtons: {
@@ -427,10 +450,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFF8F0',
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
+    borderColor: '#FFD4B0',
     borderStyle: 'dashed',
   },
   mediaBtnEmoji: {
@@ -439,8 +462,8 @@ const styles = StyleSheet.create({
   },
   mediaBtnLabel: {
     fontSize: 12,
-    color: '#666',
-    fontWeight: '600',
+    color: '#F97316',
+    fontWeight: '700',
     textAlign: 'center',
   },
   mediaPreview: {
@@ -469,10 +492,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 20,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowColor: '#F97316',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 12,
     elevation: 2,
     gap: 4,
   },
@@ -480,22 +503,22 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   fieldLabel: {
-    fontSize: 13,
-    color: '#999',
-    fontWeight: '600',
+    fontSize: 12,
+    color: '#F97316',
+    fontWeight: '700',
     marginBottom: 8,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFAF7',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     color: '#1A1A2E',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderWidth: 1.5,
+    borderColor: '#FFE4CC',
   },
   bioInput: {
     height: 100,
@@ -510,14 +533,14 @@ const styles = StyleSheet.create({
   toggleBtn: {
     paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFF8F0',
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
+    borderColor: '#FFE4CC',
   },
   toggleSelected: {
     borderColor: '#F97316',
-    backgroundColor: '#F5F0FF',
+    backgroundColor: '#FFF3E8',
   },
   toggleText: {
     fontSize: 14,
@@ -532,6 +555,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#EF4444',
     alignItems: 'center',
+    backgroundColor: '#FFF5F5',
   },
   deleteBtnText: {
     color: '#EF4444',

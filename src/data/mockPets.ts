@@ -91,7 +91,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: true,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1601758125946-6ec2ef64daf8?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Buddy is a playful golden retriever who loves fetch, long runs, and cuddles. He\'s great with kids and other dogs!',
     shelterId: 's1',
@@ -111,7 +111,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1472491235688-bdc81a63246e?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Luna is a calm, affectionate cat who loves sunny windowsills and gentle petting. Prefers to be the only pet.',
     shelterId: 's1',
@@ -131,7 +131,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Max is a charming Frenchie who loves apartment life. He\'s great with kids and other dogs, and his energy level is just right.',
     shelterId: 's2',
@@ -140,20 +140,20 @@ export const MOCK_PETS: Pet[] = [
   {
     id: 'p4',
     name: 'Bella',
-    breed: 'Labrador Mix',
+    breed: 'Dalmatian Mix',
     type: 'dog',
     size: 'large',
     age: 'adult',
     ageDisplay: '5 years',
-    energyLevel: 'medium',
+    energyLevel: 'high',
     goodWithKids: true,
     goodWithPets: true,
     hypoallergenic: false,
     needsYard: true,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
-    bio: 'Bella is a loyal and gentle lab mix who loves hiking and swimming. She\'s a total family dog.',
+    bio: 'Bella is a spirited Dalmatian mix who loves to run and play. She has tons of energy and thrives with an active family.',
     shelterId: 's2',
     distanceMiles: 9.4,
   },
@@ -171,7 +171,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1568152950566-c1bf43f4ab28?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Oliver is a majestic Maine Coon who gets along with everyone. He loves to chat and follow you around the house.',
     shelterId: 's3',
@@ -191,7 +191,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: true,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1591160690555-5d7ac5bde4f7?w=800' },
+      { type: 'image', uri: 'https://images.ctfassets.net/scac5p2hkp4h/6KwcE3j7wmNB1yD05ke990/8606c9c5a357417243b7fa30434e65f8/PoodleToy.jpg' },
     ],
     bio: 'Daisy is a hypoallergenic doodle mix full of love and energy. Perfect for families and people with allergies!',
     shelterId: 's1',
@@ -211,7 +211,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: true,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Charlie is an adventurous beagle who loves sniffing everything on long walks. A wonderful family companion.',
     shelterId: 's2',
@@ -231,7 +231,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Mochi is a fluffy kitten who loves to play and explore. She gets along with other cats and would love a playmate.',
     shelterId: 's3',
@@ -251,7 +251,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: true,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Rocky is a calm and loyal shepherd mix who would thrive as the only pet in a home with a yard.',
     shelterId: 's1',
@@ -271,7 +271,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1529778873920-4da4926a72c2?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Cleo is a graceful senior cat who loves being the center of attention. She\'s wise, gentle, and full of love.',
     shelterId: 's2',
@@ -291,7 +291,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1612536057832-2ff7ead58194?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1612536057832-2ff7ead58194?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Archie the Corgi is endlessly entertaining. He herds everyone, including the cat next door. Pure joy in a little package.',
     shelterId: 's3',
@@ -311,7 +311,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: true,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800' },
+      { type: 'image', uri: 'https://consumer-cms.petfinder.com/sites/default/files/images/content/Border%20Collie%203.jpg' },
     ],
     bio: 'Willow is a brilliant border collie who thrives with active owners. She needs space, stimulation, and tons of love.',
     shelterId: 's2',
@@ -331,7 +331,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1560114928-40f1f1eb26a0?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Nala is a social tabby who loves attention and playing. She gets along well with other cats and calm dogs.',
     shelterId: 's1',
@@ -351,7 +351,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: true,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Bear is a gentle giant who loves everyone. He\'s great with kids, dogs, and cats. The perfect family dog.',
     shelterId: 's3',
@@ -371,7 +371,7 @@ export const MOCK_PETS: Pet[] = [
     hypoallergenic: false,
     needsYard: false,
     media: [
-      { type: 'image', uri: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800' },
+      { type: 'image', uri: 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=800&h=1000&fit=crop&auto=format&q=80' },
     ],
     bio: 'Hazel is a dignified senior dachshund who deserves a quiet forever home. She loves soft blankets and gentle scratches.',
     shelterId: 's1',
